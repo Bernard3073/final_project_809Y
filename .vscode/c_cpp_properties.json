@@ -6,10 +6,18 @@
         "limitSymbolsToIncludedHeaders": true
       },
       "includePath": [
-        "/opt/ros/noetic/include/**",
-        "/usr/include/**"
+        "${workspaceFolder}/devel/include",
+        "/opt/ros/melodic/include",
+        "/usr/include/**",
+        "${workspaceFolder}/**",
+        "/opt/ros/melodic/share/**"
+
       ],
-      "name": "ROS"
+      "name": "ROS",
+      "intelliSenseMode": "gcc-x64",
+      "compilerPath": "/usr/bin/g++",
+      "cStandard": "c11",
+      "cppStandard": "c++17"
     }
   ],
   "version": 4

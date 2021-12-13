@@ -1,0 +1,26 @@
+{
+    "version": "2.0.0",
+    "tasks": [
+        {
+            "label": "prerun",
+            "type": "shell",
+            "command": "source /home/bernard/catkin_ws/devel/setup.bash",
+        },
+        {
+            "label": "build",
+            "type": "shell",
+            "command": "catkin config --extend /opt/ros/melodic && catkin build -DCMAKE_BUILD_TYPE=Debug -j4",
+            "problemMatcher": [],
+            "group": {
+                "kind": "build",
+                "isDefault": true
+            },
+        },
+        {
+            "label": "clean",
+            "type": "shell",
+            "command": "catkin clean --yes",
+            "problemMatcher": [],
+        }
+    ]
+}
