@@ -56,8 +56,8 @@ void listen(tf2_ros::Buffer& tfBuffer) {
     ROS_WARN("%s", ex.what());
     ros::Duration(1.0).sleep();
   }
+  int i;
   if(ros::param::has("target_num")){
-    int i;
     ros::param::get("target_num", i);
     target[i].push_back(transformStamped.transform.translation.x);
     target[i].push_back(transformStamped.transform.translation.y);
@@ -165,13 +165,6 @@ int main(int argc, char** argv)
   // follower_client.sendGoal(follower_goal);
   // explorer_client.waitForResult();
 
-
-  explorer_goal.target_pose.header.frame_id = "map";
-  explorer_goal.target_pose.header.stamp = ros::Time::now();
-  explorer_goal.target_pose.pose.position.x = target_list[0][0];//
-  explorer_goal.target_pose.pose.position.y = target_list[0][1];//
-  explorer_goal.target_pose.pose.orientation.w = 1.0;
-
   ros::Rate loop_rate(10);
   ros::Publisher pub = nh.advertise<geometry_msgs::Twist>("/explorer/cmd_vel",100);
   geometry_msgs::Twist msg;
@@ -179,24 +172,23 @@ int main(int argc, char** argv)
   
   bool find_marker;
   // int marker_id = 0;
-  
+  ros::param::set("target_num", 0);
+  int marker_id;
+  explorer_goal.target_pose.header.frame_id = "map";
+  explorer_goal.target_pose.header.stamp = ros::Time::now();
+  explorer_goal.target_pose.pose.position.x = target_list[0][0];
+  explorer_goal.target_pose.pose.position.y = target_list[0][1];
+  explorer_goal.target_pose.pose.orientation.w = 1.0;
+  int next_target_num = 1;
   while (ros::ok()) {
 
-    
-
     nh.getParam("find_marker", find_marker);
-    int marker_id = 0;
+    // maker sure rosparam target_num exists
     if(ros::param::has("target_num")){
       ros::param::get("target_num", marker_id);
       
     }
-    // else{
-    //   explorer_goal.target_pose.header.frame_id = "map";
-    //   explorer_goal.target_pose.header.stamp = ros::Time::now();
-    //   explorer_goal.target_pose.pose.position.x = target_list[0][0];//
-    //   explorer_goal.target_pose.pose.position.y = target_list[0][1];//
-    //   explorer_goal.target_pose.pose.orientation.w = 1.0;
-    // }
+
     if (!explorer_goal_sent)     {
       ROS_INFO("Sending goal for explorer");
       explorer_client.sendGoal(explorer_goal);//this should be sent only once
@@ -212,7 +204,21 @@ int main(int argc, char** argv)
         msg.linear.x = 0;
         msg.angular.z = 0;
         pub.publish(msg);
-        
+        explorer_goal_sent = false;
+        follower_goal_sent = false;
+        explorer_goal.target_pose.header.frame_id = "map";
+        explorer_goal.target_pose.header.stamp = ros::Time::now();
+        if(next_target_num != 4){
+          explorer_goal.target_pose.pose.position.x = target_list[next_target_num][0];//
+          explorer_goal.target_pose.pose.position.y = target_list[next_target_num][1];//
+          explorer_goal.target_pose.pose.orientation.w = 1.0;
+          next_target_num++;
+        }
+        else{
+          explorer_goal.target_pose.pose.position.x = -4;//
+          explorer_goal.target_pose.pose.position.y = 2.5;//
+          explorer_goal.target_pose.pose.orientation.w = 1.0;
+        }
       }
       else{
         msg.linear.x = 0;
@@ -234,17 +240,6 @@ int main(int argc, char** argv)
     ros::spinOnce(); //uncomment this if you have subscribers in your code
 
     loop_rate.sleep();
-    if(find_marker == true){
-
-      explorer_goal_sent = false;
-      follower_goal_sent = false;
-
-      explorer_goal.target_pose.header.frame_id = "map";
-      explorer_goal.target_pose.header.stamp = ros::Time::now();
-      explorer_goal.target_pose.pose.position.x = target_list[marker_id+1][0];//
-      explorer_goal.target_pose.pose.position.y = target_list[marker_id+1][1];//
-      explorer_goal.target_pose.pose.orientation.w = 1.0;
-    }
 
   }
 
